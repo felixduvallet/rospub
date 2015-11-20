@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+
+import argparse
+import sys
+import rospy
+
+import std_msgs
+
+def run(topic, message_type_str):
+
+    message_type = eval(message_type_str)
+    print('{} -> {}'.format(message_type_str, message_type))
+
+    pub = rospy.Publisher(topic, message_type, queue_size=1)
+
+    rospy.loginfo('Publishing message type {} on topic {}.'.
+                  format(message_type, topic))
+    rospy.loginfo('Use Ctrl+D to quit, NOTE that Ctrl+C breaks everything.')
+
+    done = False
+    while not done:
+        try:
+            x = raw_input('>>> ')
+        except EOFError:  # CTRL+D = quit
+            done = True
+            break
+        except KeyboardInterrupt:
+            continue
+
+        # Prevent empty messages from going out.
+        if not x:
+            continue
+
+        msg = message_type(x)
+
+        pub.publish(msg)
+        rospy.loginfo('Published message: {}'.format(msg))
+        pass
+    rospy.loginfo('Finished')
+
+def options(args):
+    parser = argparse.ArgumentParser(
+        description=('Publish messages directly from the terminal to a topic. '
+                     'Usage: rospub <topic> <message type>'))
+    parser.add_argument('topic',  metavar='topic',
+            help='ROS topic.')
+    parser.add_argument('message',  metavar='message',
+                help='ROS message type (e.g., std_msgs.msg.String).')
+
+    arguments = parser.parse_args(args)
+    return arguments.topic, arguments.message
+
+
+if __name__ == '__main__':
+    rospy.init_node('rospub', anonymous=True)
+    args = sys.argv[1:]  # argv[0] is program name.
+    (topic, message_type) = options(args)
+    run(topic, message_type)
