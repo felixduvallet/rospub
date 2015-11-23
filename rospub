@@ -23,9 +23,8 @@ import rospy
 import std_msgs
 
 def run(topic, message_type_str):
-
+    # Get the actual message type.
     message_type = eval(message_type_str)
-    print('{} -> {}'.format(message_type_str, message_type))
 
     pub = rospy.Publisher(topic, message_type, queue_size=1)
 
@@ -37,18 +36,18 @@ def run(topic, message_type_str):
     while not done:
         try:
             term_input = raw_input('>>> ')
+        except KeyboardInterrupt:
+            print('Keyboard interrupt')
+            continue
         except EOFError:  # CTRL+D = quit
             done = True
             break
-        except KeyboardInterrupt:
-            continue
 
         # Prevent empty messages from going out.
         if not term_input:
             continue
 
         msg = message_type(term_input)
-
         pub.publish(msg)
         rospy.loginfo('Published message: {}'.format(msg))
         pass
@@ -63,13 +62,14 @@ def options(args):
                         help='ROS topic.')
     parser.add_argument('message',  metavar='message',
                         help='ROS message type (e.g., std_msgs.msg.String).')
+    parser.print_help()
 
     arguments = parser.parse_args(args)
     return arguments.topic, arguments.message
 
 
 if __name__ == '__main__':
-    rospy.init_node('rospub', anonymous=True)
     args = sys.argv[1:]  # argv[0] is program name.
     (topic, message_type) = options(args)
+    rospy.init_node('rospub', anonymous=True)
     run(topic, message_type)
