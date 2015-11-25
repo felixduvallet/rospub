@@ -103,6 +103,6 @@ def options(args):
 
 if __name__ == '__main__':
     args = sys.argv[1:]  # argv[0] is program name.
-    (topic, message_type) = options(args)
+    (ros_topic, message_type_str) = options(args)
     rospy.init_node('rospub', anonymous=True)
-    run(topic, message_type)
+    run(ros_topic, message_type_str)
