@@ -67,10 +67,22 @@ structs:
 """
 
 def make_message(message_type_str, content):
+    # Both content and message_type are strings: the message content is returned
+    # from raw_input.
+
+    # Get the actual message type.
     message_t = eval(message_type_str)
 
-    msg = message_t(content)
+    msg = None
+    try:
+        # Convert
+        msg = message_t(eval(content))
+        return msg
+    except SyntaxError:
+        # For example if we get a string as input.
+        pass
 
+    msg = message_t(content)
     return msg
 
 

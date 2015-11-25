@@ -24,6 +24,18 @@ class TestCase(unittest.TestCase):
         self.assertIsInstance(msg, std_msgs.msg.String)
         self.assertEqual(content, msg.data)
 
+    def test_int32(self):
+        msg_type = 'std_msgs.msg.Int32'
+        content = '42'  # raw_input will always return a string.
+
+        msg = rospub.make_message(msg_type, content)
+        self.assertIsNotNone(msg)
+
+        self.assertIsInstance(msg, std_msgs.msg.Int32)
+        self.assertIsInstance(msg.data, int)
+        self.assertEqual(42, msg.data)
+
+
 
 if __name__ == '__main__':
     unittest.main()
