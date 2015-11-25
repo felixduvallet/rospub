@@ -1,0 +1,6 @@
+language: python
+sudo: false  # Be explicit.
+
+# command to run tests
+script: nosetests
+
