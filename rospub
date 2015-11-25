@@ -27,7 +27,7 @@ import std_msgs
 def run(topic, message_type_str):
     # Get the actual message type.
 
-
+    message_type = eval(message_type_str)
     pub = rospy.Publisher(topic, message_type, queue_size=1)
 
     rospy.loginfo('Publishing message type {} on topic {}.'.
@@ -49,7 +49,8 @@ def run(topic, message_type_str):
         if not term_input:
             continue
 
-        msg = message_type(term_input)
+        msg = make_message(message_type_str, term_input)
+
         rospy.loginfo('Published message: {}'.format(msg))
         pub.publish(msg)
         pass
