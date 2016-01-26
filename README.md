@@ -7,23 +7,18 @@ Usage: `rospub <topic> <message type>`
 
 where:
   - topic: ROS topic messages should be published to
-  - message: ROS message type (e.g., std_msgs.msg.String).
+  - message: ROS message type (e.g., std_msgs.msg.String, geometry_msgs.msg.Point).
 
 
+We supports simple types:
 
+    ./rospub /foo std_msgs.msg.Int32
+    >>> 42
+    (publishes an Int32(42))
 
+and more complex aggregate types:
 
-TODO: use genpy
-```
-In [55]: g = geometry_msgs.msg.Point()
+    ./rospub /foo geometry_msgs.msg.Point
+    >>> 1, 2, 3
+    (publishes a Point(x=1, y=2, z=3))
 
-In [56]: d = dict(x=3, y=5, z=4)
-
-In [57]: genpy.message.fill_message_args(g, d)
-
-In [58]: g
-Out[58]:
-x: 3
-y: 5
-z: 4
-```
