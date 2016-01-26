@@ -97,7 +97,7 @@ def make_message(message_type_str, content):
 
     try:
         genpy.message.fill_message_args(msg, content_parsed)
-    except genpy.message.MessageException as e:
+    except (genpy.message.MessageException, ValueError) as e:
         rospy.logwarn('Could not create message: {}'.format(e))
         msg = None
 
