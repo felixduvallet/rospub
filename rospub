@@ -19,19 +19,29 @@ Author: Felix Duvallet <felix.duvallet@epfl.ch>
 import argparse
 import sys
 import rospy
+import genpy
+import yaml
 
 import std_msgs
-
+import geometry_msgs.msg
+# TODO: dynamic importing based on message type.
 
 
 def run(topic, message_type_str):
     # Get the actual message type.
 
-    message_type = eval(message_type_str)
-    pub = rospy.Publisher(topic, message_type, queue_size=1)
+    rospy.loginfo('Creating publisher for type: {}'.format(message_type_str))
+
+    try:
+        message_type = eval(message_type_str)
+        pub = rospy.Publisher(topic, message_type, queue_size=1)
+    except (NameError, AttributeError) as e:
+        rospy.logerr('Could not create publisher for type {}:'.format(message_type_str))
+        rospy.logerr('  {}'.format(e))
+        return
 
     rospy.loginfo('Publishing message type {} on topic {}.'.
-                  format(message_type, topic))
+                  format(message_type_str, topic))
     rospy.loginfo('Use Ctrl+D to quit, NOTE that Ctrl+C breaks everything.')
 
     done = False
@@ -51,9 +61,10 @@ def run(topic, message_type_str):
 
         msg = make_message(message_type_str, term_input)
 
-        rospy.loginfo('Published message: {}'.format(msg))
-        pub.publish(msg)
-        pass
+        if msg:
+            pub.publish(msg)
+            rospy.loginfo('Published message: {}'.format(msg))
+
     rospy.loginfo('Finished')
 
 
@@ -72,18 +83,24 @@ def make_message(message_type_str, content):
     :param content The content of the message as a string.
 
     """
-    # Get the actual message type.
+    # Get the actual message type (from string) and instantiate one.
     message_t = eval(message_type_str)
+    msg = message_t()
 
-    msg = None
+    # Parse the content (assumed to be a string with commas) into a list of
+    # yaml types, *unless* the desired message type is a string, in which case
+    # do not try to split up or parse as yaml data.
+    if message_type_str == 'std_msgs.msg.String':
+        content_parsed = [content]
+    else:
+        content_parsed = [yaml.load(x) for x in content.split(',')]
+
     try:
-        msg = message_t(eval(content))
-        return msg
-    except SyntaxError:
-        # For example if we get a string as input.
-        pass
+        genpy.message.fill_message_args(msg, content_parsed)
+    except (genpy.message.MessageException, ValueError) as e:
+        rospy.logwarn('Could not create message: {}'.format(e))
+        msg = None
 
-    msg = message_t(content)
     return msg
 
 
