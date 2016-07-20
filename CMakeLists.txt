@@ -42,7 +42,7 @@ include_directories(
 #############
 
 install(PROGRAMS
-  scripts/rospub
+  rospub
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
